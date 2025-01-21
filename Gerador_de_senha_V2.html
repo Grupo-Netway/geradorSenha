@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Senha</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: #000 url('https://www.transparenttextures.com/patterns/stardust.png'); /* Fundo escuro com estrelas */
+        }
+        .container {
+            background: #FFA500; /* Cor do container laranja */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .email, .password {
+            font-size: 20px;
+            margin: 10px 0;
+            color: #000; /* Cor do texto */
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 5px;
+            background-color: #ffffff; /* Cor dos botões */
+            border: none;
+            border-radius: 10px; /* Aumentado para 10px */
+            transition: background-color 0.3s, transform 0.3s; /* Efeito de transição */
+        }
+        button:hover {
+            background-color: #ddd; /* Cor dos botões ao passar o mouse */
+            transform: scale(1.05); /* Aumenta o botão ligeiramente ao passar o mouse */
+        }
+        input, select {
+            padding: 5px;
+            font-size: 16px;
+            margin-bottom: 10px;
+            width: 100%;
+            border: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Gerador de Senha</h1>
+    <input type="text" id="userName" placeholder="Nome" oninput="formatName()">
+    <select id="provider">
+        <option value="" disabled selected>Selecionar empresa</option>
+        <option value="@netway.inf.br">Netway</option>
+        <option value="@teleturbo.com.br">Teleturbo</option>
+        <option value="@rvinternet.com.br">RV Internet</option>
+        <option value="@interfacetelecom.com.br">Interface</option>
+        <option value="@agathanet.com.br">Agatha</option>
+	<option value="@agiletelecom.net.br">Ágile</option>
+	<option value="@netwayparecis.com.br">Parecis</option>
+    </select>
+    <input type="number" id="passwordLength" placeholder="Quantidade de caracteres (1-15)" min="1" max="15" value="10">
+    <div class="email" id="email"></div>
+    <div class="password" id="password">Clique no botão para gerar uma senha</div>
+    <button onclick="generatePasswordAndEmail()">Gerar Senha</button>
+    <button onclick="copyPassword()">Copiar Senha</button>
+</div>
+
+<script>
+    const words = [
+        "Antena", "Banda", "Larga", "Conexão", "Download", "Upload", "Router", "Firewall", "Modem", "Provedor",
+        "IP", "Endereço", "Servidor", "DNS", "WiFi", "LTE", "5G", "Fibra", "Óptica", "Satélite",
+        "Wireless", "Rede", "Celular", "Telecomunicação", "Telefone", "Digital", "Protocolo", "Navegador", "Cabos",
+        "Switch", "Hub", "Infraestrutura", "Pacote", "Gateway", "Cloud", "Computação", "Data", "Center", "Latency",
+        "Streaming", "VoIP", "Videochamada", "Bluetooth", "USB", "VPN", "Cryptografia", "Segurança", "Backup", "Dispositivo",
+        "Inteligente", "ISP", "Hotspot", "Ping", "Porta", "Velocidade", "Signal", "IPv4", "IPv6", "TCP",
+        "UDP", "SSL", "TLS", "HTTPS", "FTP", "SNMP", "SMTP", "IMAP", "POP3", "Proxy",
+        "NAT", "Repetidor", "Access", "Point", "SSID", "LAN", "WAN", "MAN", "SAN", "VLAN",
+        "NAS", "DoS", "Intrusão", "Firewall", "IDS", "IPS", "Análise", "Tráfego", "Logs", "Monitoramento",
+        "Conteúdo", "Streaming", "Internet", "Roteador", "Megabits", "HDMI", "Bandwidth", "Upload", "Ethernet", "4G",
+        "Fibra", "Óptica", "Data", "Center", "Modulação", "Demodulação", "Amplificação", "Ativação", "Backhaul", "Banda",
+        "Baseband", "Broadband", "Cabos", "Categoria", "Célula", "Chamada", "Chip", "Código", "Cobertura", "Comutação",
+        "Conector", "Conversor", "Decodificação", "E2E", "Engenharia", "Enlace", "Escalabilidade", "Escuta", "Estação",
+        "Extranet", "Fibra", "Gateway", "Gpon", "Home", "Idc", "Iluminação", "Infraestrutura", "Interconexão", "Internet",
+        "Interoperabilidade", "IoT", "Ipsec", "Ipv4", "Ipv6", "Iso", "Isoc", "Itu", "L2tp", "Lan",
+        "Latência", "Lte", "Mac", "Malha", "Mbps", "Megabits", "Método", "Microwave", "Mobile", "Modem",
+        "Multiplexação", "Networking", "Nível", "Noc", "Ocxo", "Ofdm", "Olt", "Ono", "Ont", "Optical",
+        "Optoeletrônica", "Padrão", "Packet", "Patch", "Pbx", "Pcs", "Pdcp", "Pdu", "Pec", "Performance",
+        "Placa", "Pnp", "Porta", "Potência", "Provedor", "Protocolo", "Proxy", "QoS", "Rádio", "Ramal",
+        "Rastreabilidade", "Rede", "Rfi", "Roaming", "Router", "Rssi", "Saída", "Satélite", "Sec", "Segmento",
+        "Servidor", "Sinal", "Site", "Sms", "Smtp", "Snmp", "Sondagem", "Switch", "Taxa", "Tcp",
+        "Tecnologia", "Telecomunicação", "Telefonia", "Telemetria", "Térmica", "Teste", "Transmissão", "Troca", "Tronco", "Uml",
+        "Upload", "Url", "Usb", "Usuário", "Vlan", "Voip", "Vpn", "Wan", "Web", "Wireless",
+        "Wi-Fi", "WiMax", "Xdsl", "Xon", "Xoff", "Zigbee", "Zwave", "1G", "2G", "3G",
+        "4G", "5G", "Antenna", "Bandwidth", "Broadband", "Cell", "Channel", "Circuit", "Communication", "Connectivity",
+        "Coverage", "Data", "Digital", "Fiber", "Frequency", "Gigabit", "Infrastructure", "Internet", "Latency", "Link",
+        "Mobile", "Modulation", "Network", "Optical", "Protocol", "Router", "Satellite", "Signal", "Speed", "Switch",
+        "Telecom", "Transmission", "Wireless", "XML", "JSON", "HTTP", "HTTPS", "TCP/IP", "UDP", "FTP",
+        "SMTP", "DNS", "DHCP", "NAT", "Firewall", "Proxy", "VPN", "Encryption", "SSL", "TLS",
+        "Cryptography", "AES", "RSA", "SHA", "MD5", "Checksum", "Bandwidth", "Broadband", "Carrier", "Cellular",
+        "Channel", "Communication", "Connection", "Coverage", "Data", "DSL", "Fiber", "Frequency", "Gigabit", "Infrastructure",
+        "Internet", "IP", "LAN", "Latency", "Link", "LTE", "Modem", "Network", "Packet", "Protocol",
+        "Router", "Satellite", "Signal", "Speed", "Switch", "Telecom", "Transceiver", "Transmission", "Wi-Fi", "Wireless"
+    ];
+
+    function getRandomWord() {
+        const index = Math.floor(Math.random() * words.length);
+        return words[index];
+    }
+
+    function replaceLettersWithNumbers(word) {
+        const replacements = {
+            'A': '4',
+            'a': '4',
+            'E': '3',
+            'e': '3',
+            'I': '1',
+            'i': '1',
+            'O': '0',
+            'o': '0'
+        };
+        let modifiedWord = '';
+        for (let char of word) {
+            if (Math.random() < 0.5 && replacements[char]) {
+                modifiedWord += replacements[char];
+            } else {
+                modifiedWord += char;
+            }
+        }
+        return modifiedWord;
+    }
+
+    function generatePassword() {
+        const lengthInput = document.getElementById("passwordLength");
+        let maxLength = parseInt(lengthInput.value);
+
+        if (isNaN(maxLength) || maxLength < 1 || maxLength > 15) {
+            maxLength = 15; // Default to 15 if input is invalid
+        }
+
+        let password = "@";
+        while (password.length < maxLength) {
+            let word1 = replaceLettersWithNumbers(getRandomWord());
+            let word2 = replaceLettersWithNumbers(getRandomWord());
+            let newSegment = `${word1}#${word2}`;
+            if (password.length + newSegment.length > maxLength) {
+                newSegment = newSegment.substring(0, maxLength - password.length);
+            }
+            password += newSegment;
+        }
+        document.getElementById("password").textContent = password;
+    }
+
+    function generateEmail() {
+        const nameInput = document.getElementById("userName").value.trim();
+        const providerInput = document.getElementById("provider").value;
+
+        if (nameInput && providerInput) {
+            const names = nameInput.split(" ");
+            if (names.length >= 2) {
+                const email = `${names[0].toLowerCase()}.${names[1].toLowerCase()}${providerInput}`;
+                document.getElementById("email").textContent = email;
+            } else {
+                document.getElementById("email").textContent = "";
+            }
+        } else {
+            document.getElementById("email").textContent = "";
+        }
+    }
+
+    function generatePasswordAndEmail() {
+        generateEmail();
+        generatePassword();
+    }
+
+    function copyPassword() {
+        const password = document.getElementById("password").textContent;
+        navigator.clipboard.writeText(password).then(() => {
+            alert("Senha copiada para a área de transferência!");
+        });
+    }
+
+    function formatName() {
+        const userNameInput = document.getElementById("userName");
+        const names = userNameInput.value.split(" ");
+        const formattedNames = names.map(name => name.charAt(0).toUpperCase() + name.slice(1).toLowerCase());
+        userNameInput.value = formattedNames.join(" ");
+    }
+</script>
+
+</body>
+</html>
